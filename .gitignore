@@ -1,0 +1,8 @@
+.idea
+
+# ignore all envs
+.env
+config/config.yaml
+
+# ignore macos conf files
+.DS_Store
