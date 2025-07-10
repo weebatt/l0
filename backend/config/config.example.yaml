@@ -1,0 +1,25 @@
+server:
+  host: 0.0.0.0
+  port: 8081
+  read_timeout: 5
+  write_timeout: 10
+  idle_timeout: 15
+  shutdown_timeout: 5
+
+postgres:
+  host: postgres
+  port: 5432
+  user: test
+  password: test_password
+  dbname: test_db
+  ssl_mode: disable
+  msx_conns: 50
+  min_conns: 10
+  timeout: 5
+  max_retries: 5
+  retry_delay: 3
+
+kafka:
+  brokers: ["kafka:9092"]
+  topic: orders
+  group_id: order-consumer
