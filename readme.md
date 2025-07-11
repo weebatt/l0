@@ -35,5 +35,5 @@ curl "http://localhost:8081/order?order_uid=<uuid>"
 
 ## Resources
 
-- [The service connects to a message broker (Kafka) and processes messages online and The HTTP server returns correct data in JSON format](resources/kafka_and_response.mov)
-- [The interface displays the data in a clear way after entering the ID and pressing the button and the cache really speeds up data retrieval](resources/metrics.mov)
+- [The service connects to a message broker (Kafka) and processes messages online and The HTTP server returns correct data in JSON format](https://drive.google.com/drive/folders/1sXYwjEgPVmo4GP2yk7ADDrFeAGuYRTZa?usp=sharing)
+- [The interface displays the data in a clear way after entering the ID and pressing the button and the cache really speeds up data retrieval](https://drive.google.com/drive/folders/1sXYwjEgPVmo4GP2yk7ADDrFeAGuYRTZa?usp=sharing)
