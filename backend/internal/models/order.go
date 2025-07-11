@@ -1,14 +1,8 @@
 package models
 
 import (
-	"context"
-
 	"github.com/google/uuid"
 )
-
-type Validator interface {
-	Valid(ctx context.Context) (problems map[string]string)
-}
 
 type Order struct {
 	OrderUID          uuid.UUID `json:"order_uid"`
@@ -25,8 +19,4 @@ type Order struct {
 	DateCreated       string    `json:"date_created"`
 	OofShard          string    `json:"oof_shard"`
 	InternalSignature string    `json:"internal_signature"`
-}
-
-func (o Order) Valid(ctx context.Context) (problems map[string]string) {
-	return map[string]string{}
 }
