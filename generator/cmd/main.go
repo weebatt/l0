@@ -18,11 +18,15 @@ func main() {
 		logger.GetFromContext(ctx).Fatal("failed to initialize logger", zap.Error(err))
 	}
 
+	logger.GetFromContext(ctx).Info("successfully initialized logger")
+
 	// Initialize configuration
 	kafkaConfig, err := config.New()
 	if err != nil {
 		logger.GetFromContext(ctx).Fatal("failed to read configuration", zap.Error(err))
 	}
+
+	logger.GetFromContext(ctx).Info("successfully read configuration")
 
 	if err := kafka.ProduceOrdersToKafka(ctx, kafkaConfig); err != nil {
 		logger.GetFromContext(ctx).Error("Kafka produce error", zap.Error(err))

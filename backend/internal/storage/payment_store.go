@@ -41,7 +41,7 @@ func (s *paymentStore) CreatePayment(ctx context.Context, p *models.Payment) err
 }
 
 func (s *paymentStore) GetPayment(ctx context.Context, transaction uuid.UUID) (*models.Payment, error) {
-	query := `SELECT * FROM payment WHERE transaction = $1`
+	query := `SELECT transaction, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee, request_id FROM payment WHERE transaction = $1`
 
 	var p models.Payment
 	err := s.db.QueryRowContext(ctx, query, transaction).Scan(

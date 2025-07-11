@@ -12,7 +12,7 @@ import (
 
 func ProduceOrdersToKafka(ctx context.Context, kafkaConfig *config.Kafka) error {
 	writer := kafka.NewWriter(kafka.WriterConfig{
-		Brokers:  []string{kafkaConfig.Broker},
+		Brokers:  kafkaConfig.Broker,
 		Topic:    kafkaConfig.Topic,
 		Balancer: &kafka.LeastBytes{},
 	})

@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"l0/internal/models"
+
+	"github.com/google/uuid"
 )
 
 type DeliveryStore interface {
-	GetDelivery(ctx context.Context, order_uid string) (*models.Delivery, error)
+	GetDelivery(ctx context.Context, order_uid uuid.UUID) (*models.Delivery, error)
 	CreateDelivery(ctx context.Context, d *models.Delivery) error
 }
 
@@ -36,8 +38,8 @@ func (s *deliveryStore) CreateDelivery(ctx context.Context, d *models.Delivery) 
 	return err
 }
 
-func (s *deliveryStore) GetDelivery(ctx context.Context, order_uid string) (*models.Delivery, error) {
-	query := `SELECT * FROM delivery WHERE order_uid = $1`
+func (s *deliveryStore) GetDelivery(ctx context.Context, order_uid uuid.UUID) (*models.Delivery, error) {
+	query := `SELECT order_uid, name, phone, zip, city, address, region, email, delivery_id FROM delivery WHERE order_uid = $1`
 
 	var d models.Delivery
 	err := s.db.QueryRowContext(ctx, query, order_uid).Scan(

@@ -7,6 +7,8 @@ import (
 	"l0/internal/handlers"
 	"l0/internal/storage"
 	"net/http"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func NewServer(
@@ -14,19 +16,32 @@ func NewServer(
 	cfg *config.Config,
 	orderCache *cache.OrderCache,
 	orderStore storage.OrderStore,
+	deliveryStore storage.DeliveryStore,
+	paymentStore storage.PaymentStore,
+	itemsStore storage.ItemsStore,
+	cacheSaverStore storage.CacheSaverStore,
 ) http.Handler {
-	mux := http.NewServeMux()
-
+	apiMux := http.NewServeMux()
 	addRoutes(
 		ctx,
-		mux,
+		apiMux,
 		cfg,
 		orderCache,
 		orderStore,
+		deliveryStore,
+		paymentStore,
+		itemsStore,
+		cacheSaverStore,
 	)
 
-	var handler http.Handler = mux
-	handler = handlers.OrderCacheMiddleware(orderCache, handler)
-	handler = handlers.CORSMiddleware(handler)
-	return handler
+	var apiHandler http.Handler = apiMux
+	apiHandler = handlers.OrderCacheMiddleware(ctx, orderCache, apiHandler)
+	apiHandler = handlers.CORSMiddleware(apiHandler)
+
+	rootMux := http.NewServeMux()
+	rootMux.Handle("/metrics", promhttp.Handler())
+	rootMux.Handle("/health", handlers.HandleHealth(ctx))
+	rootMux.Handle("/", apiHandler)
+
+	return rootMux
 }

@@ -1,15 +1,20 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"l0/internal/cache"
 	"l0/internal/metrics"
+	"time"
+
+	"l0/pkg/logger"
 	"net/http"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
-func OrderCacheMiddleware(orderCache *cache.OrderCache, next http.Handler) http.Handler {
+func OrderCacheMiddleware(ctx context.Context, orderCache *cache.OrderCache, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		idStr := r.URL.Query().Get("order_uid")
 		id, err := uuid.Parse(idStr)
@@ -17,15 +22,29 @@ func OrderCacheMiddleware(orderCache *cache.OrderCache, next http.Handler) http.
 			http.Error(w, "invalid order_uid", http.StatusBadRequest)
 			return
 		}
+
+		start := time.Now()
 		order, ok := orderCache.Get(id)
+
 		if ok {
+			logger.GetFromContext(ctx).Info("order found in cache", zap.String("order_uid", idStr))
 			metrics.OrderCacheHits.Inc()
+
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(order)
+
+			cacheDuration := time.Since(start).Seconds()
+			metrics.CacheLookupDuration.Observe(cacheDuration)
+			metrics.OrderCacheLookupDuration.Set(cacheDuration)
 			return
 		}
+
+		logger.GetFromContext(ctx).Info("order not found in cache", zap.String("order_uid", idStr))
 		metrics.OrderCacheMisses.Inc()
+
 		next.ServeHTTP(w, r)
+
+		logger.GetFromContext(ctx).Info("order loaded from DB", zap.String("order_uid", idStr))
 	})
 }
 
