@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"l0/internal/cache"
-	"l0/internal/metrics"
 	"l0/internal/storage"
 	"l0/pkg/logger"
+	"l0/pkg/metrics"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"

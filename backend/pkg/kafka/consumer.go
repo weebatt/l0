@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"l0/internal/config"
-	"l0/internal/metrics"
 	"l0/internal/models"
 	"l0/pkg/logger"
+	"l0/pkg/metrics"
 
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"

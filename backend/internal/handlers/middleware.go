@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"l0/internal/cache"
-	"l0/internal/metrics"
+	"l0/pkg/metrics"
 	"time"
 
 	"l0/pkg/logger"
