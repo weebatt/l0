@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"l0/internal/models"
+
+	"github.com/google/uuid"
 )
 
 type ItemsStore interface {
-	GetItems(ctx context.Context, order_uid string) ([]models.Item, error)
+	GetItems(ctx context.Context, order_uid uuid.UUID) (*[]models.Item, error)
 	CreateItems(ctx context.Context, items []models.Item) error
 }
 
@@ -45,8 +47,8 @@ func (s *itemsStore) CreateItems(ctx context.Context, items []models.Item) error
 	return nil
 }
 
-func (s *itemsStore) GetItems(ctx context.Context, order_uid string) ([]models.Item, error) {
-	query := `SELECT * FROM items WHERE order_uid = $1`
+func (s *itemsStore) GetItems(ctx context.Context, order_uid uuid.UUID) (*[]models.Item, error) {
+	query := `SELECT order_uid, chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status FROM items WHERE order_uid = $1`
 
 	rows, err := s.db.QueryContext(ctx, query, order_uid)
 	if err != nil {
@@ -75,5 +77,5 @@ func (s *itemsStore) GetItems(ctx context.Context, order_uid string) ([]models.I
 			items = append(items, it)
 		}
 	}
-	return items, nil
+	return &items, nil
 }

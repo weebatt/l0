@@ -7,8 +7,6 @@ import (
 	"l0/internal/handlers"
 	"l0/internal/storage"
 	"net/http"
-
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func addRoutes(
@@ -17,8 +15,10 @@ func addRoutes(
 	cfg *config.Config,
 	orderCache *cache.OrderCache,
 	orderStore storage.OrderStore,
+	deliveryStore storage.DeliveryStore,
+	paymentStore storage.PaymentStore,
+	itemsStore storage.ItemsStore,
+	cacheSaverStore storage.CacheSaverStore,
 ) {
-	mux.Handle("/health", handlers.HandleHealth(ctx))
-	mux.Handle("/order", handlers.OrderHandler(orderCache, orderStore))
-	mux.Handle("/metrics", promhttp.Handler())
+	mux.Handle("/order", handlers.OrderHandler(ctx, orderCache, orderStore, deliveryStore, paymentStore, itemsStore, cacheSaverStore))
 }

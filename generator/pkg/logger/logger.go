@@ -2,6 +2,8 @@ package logger
 
 import (
 	"context"
+	"go.uber.org/zap/zapcore"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -14,8 +16,17 @@ type Logger struct {
 	logger *zap.Logger
 }
 
+func customTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(t.Format("2006-01-02 15:04:05"))
+}
+
 func New(ctx context.Context) (context.Context, error) {
-	logger, err := zap.NewProduction()
+	config := zap.NewProductionConfig()
+	config.EncoderConfig.EncodeTime = customTimeEncoder
+	config.EncoderConfig.TimeKey = "time"
+
+	logger, err := config.Build()
+
 	if err != nil {
 		return ctx, err
 	}

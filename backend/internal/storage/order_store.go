@@ -55,7 +55,7 @@ func (s *orderStore) CreateOrder(
 	internal_signature string,
 ) error {
 	query := `INSERT INTO orders(order_uid, track_number, entry, locale, customer_id, 
-            delivery_service, shardkey, sm_id, date_created, oof_shard, internal_signature)
+            delivery_service, shardkey, sm_id, oof_shard, internal_signature, date_created)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 
 	_, err := s.db.ExecContext(
@@ -80,7 +80,7 @@ func (s *orderStore) CreateOrder(
 }
 
 func (s *orderStore) GetOrder(ctx context.Context, order_uid uuid.UUID) (*models.Order, error) {
-	query := `SELECT * FROM orders WHERE order_uid = $1`
+	query := `SELECT order_uid, track_number, entry, locale, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard, internal_signature FROM orders WHERE order_uid = $1`
 
 	var order models.Order
 	err := s.db.QueryRowContext(ctx, query, order_uid).
@@ -93,19 +93,24 @@ func (s *orderStore) GetOrder(ctx context.Context, order_uid uuid.UUID) (*models
 			&order.DeliveryService,
 			&order.Shardkey,
 			&order.SmID,
+			&order.DateCreated,
 			&order.OofShard,
 			&order.InternalSignature,
 		)
 
 	if err != nil {
-		logger.GetFromContext(ctx).Error("troubles with getting order", zap.Error(err))
+		return nil, err
+		// lg, ok := ctx.Value(logger.Key).(*logger.Logger)
+		// if ok && err != nil {
+		// 	lg.Error("troubles with getting order", zap.Error(err))
+		// }
 	}
 
 	return &order, nil
 }
 
 func (s *orderStore) GetAllOrders(ctx context.Context) ([]*models.Order, error) {
-	rows, err := s.db.QueryContext(ctx, "SELECT order_uid, track_number, entry, locale, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard, internal_signature FROM orders")
+	rows, err := s.db.QueryContext(ctx, "SELECT order_uid, track_number, entry, locale, customer_id, delivery_service, shardkey, sm_id, date_created,oof_shard, internal_signature FROM orders")
 	if err != nil {
 		return nil, err
 	}

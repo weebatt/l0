@@ -71,24 +71,25 @@ services:
     networks:
       - l0_network
 
-  generator:
-    container_name: l0_generator
-    restart: no
-    depends_on:
-      postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      zookeeper:
-        condition: service_started
-    build:
-      context: ./generator
-      dockerfile: Dockerfile
-    networks:
-      - l0_network  
+  # generator:
+  #   container_name: l0_generator
+  #   restart: no
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_healthy
+  #     zookeeper:
+  #       condition: service_started
+  #   build:
+  #     context: ./generator
+  #     dockerfile: Dockerfile
+  #   networks:
+  #     - l0_network  
 
   prometheus:
     image: prom/prometheus
+    container_name: l0_prometheus
     ports:
       - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
     volumes:
@@ -98,6 +99,7 @@ services:
 
   grafana:
     image: grafana/grafana
+    container_name: l0_grafana
     ports:
       - "${GRAFANA_PORT}:3000"
     networks:

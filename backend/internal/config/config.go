@@ -29,7 +29,7 @@ type postgres struct {
 }
 
 type Kafka struct {
-	Brokers []string `yaml:"brokers" env:"KAFKA_BROKERS" envSeparator:"," envDefault:"localhost:9092"`
+	Brokers []string `yaml:"brokers" env:"KAFKA_BROKERS" envSeparator:"," envDefault:"kafka:9092"`
 	Topic   string   `yaml:"topic" env:"KAFKA_TOPIC" envDefault:"orders"`
 	GroupID string   `yaml:"group_id" env:"KAFKA_GROUP_ID" envDefault:"order-consumer"`
 }

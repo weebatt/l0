@@ -9,6 +9,7 @@ import (
 	"l0/internal/cache"
 	"l0/internal/config"
 	"l0/internal/kafka"
+	metrics "l0/internal/metrics"
 	"l0/internal/models"
 	"l0/internal/server"
 	"l0/internal/storage"
@@ -41,6 +42,9 @@ func run(
 	getenv func(string) string,
 	stdout, stderr io.Writer,
 ) error {
+	// Register collecting metrics
+	metrics.Register()
+
 	// Initialize logger
 	ctx, err := logger.New(ctx)
 	if err != nil {
@@ -85,15 +89,34 @@ func run(
 	deliveryStore := storage.NewDeliveryStore(db)
 	paymentStore := storage.NewPaymentStore(db)
 	itemStore := storage.NewItemsStore(db)
+	cacheSaverStore := storage.NewCacheSaverStore(db)
 	orderCache := cache.NewOrderCache()
 
-	// Load cache from postgres
-	orders, err := orderStore.GetAllOrders(ctx)
+	orderUIDs, err := cacheSaverStore.GetAllCachedOrderUIDs(ctx)
 	if err != nil {
-		logger.GetFromContext(ctx).Error("failed to load orders from db for cache", zap.Error(err))
+		logger.GetFromContext(ctx).Error("failed to load cache_saver order_uids", zap.Error(err))
 	} else {
+		var orders []*models.Order
+		for _, uid := range orderUIDs {
+			order, err := orderStore.GetOrder(ctx, uid)
+			if err == nil && order != nil {
+				delivery, _ := deliveryStore.GetDelivery(ctx, uid)
+				if delivery != nil {
+					order.Delivery = *delivery
+				}
+				payment, _ := paymentStore.GetPayment(ctx, uid)
+				if payment != nil {
+					order.Payment = *payment
+				}
+				items, _ := itemStore.GetItems(ctx, uid)
+				if items != nil {
+					order.Items = *items
+				}
+				orders = append(orders, order)
+			}
+		}
 		orderCache.Load(orders)
-		logger.GetFromContext(ctx).Info("order cache loaded from db", zap.Int("count", len(orders)))
+		logger.GetFromContext(ctx).Info("order cache loaded from cache_saver", zap.Int("count", len(orders)))
 	}
 
 	// Start consume messages from kafka
@@ -170,6 +193,10 @@ func run(
 		cfg,
 		orderCache,
 		orderStore,
+		deliveryStore,
+		paymentStore,
+		itemStore,
+		cacheSaverStore,
 	)
 
 	server := &http.Server{
